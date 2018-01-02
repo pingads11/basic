@@ -1,0 +1,66 @@
+import urllib2
+import ssl
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+test_string = 'API for vCloud communication.'
+
+
+def testpage():
+    req = urllib2.Request('https://stagging_webserver.com:8080/rest_api/')
+    context = ssl._create_unverified_context()
+    try:
+        #Disable SSL check
+        response = urllib2.urlopen(req, context=context)
+        the_page = response.read()
+    except urllib2.HTTPError as err:
+        the_page = err.code
+    return the_page
+
+
+def sendmail():
+    response = testpage()  # return IP for lisence and SC issue
+    me = 'ads@gmail.com'
+    you = ['ads@gmail.com']
+    username = 'ads@gmail.com'
+    password = 'ads123'
+    server = smtplib.SMTP('smtp.gmail.com:587')
+    server.starttls()
+    server.login(username, password)
+    # Create message container - the correct MIME type is multipart/alternative.
+    msg = MIMEMultipart('alternative')
+    msg['From'] = me
+    msg['To'] = you
+    text = ""
+    send = False
+    html = "<html><head></head><body><table border='1px solid'>"
+    
+    # check for desired string or http status is OK 200
+    if response == test_string or response != "200":
+        send = False
+        msg['Subject'] = "RestAPI Down"
+        html += "<tr><th><b>Issue with Rest API Please Check https://x.x.x.x/rest_api </b></th></tr>"
+
+    html += "</table></body></html>"
+    # Record the MIME types of both parts - text/plain and text/html.
+    data = MIMEText(html, 'html')
+    print data
+    # Attach parts into message container.
+    # According to RFC 2046, the last part of a multipart message, in this case
+    # the HTML message, is best and preferred.
+    msg.attach(data)
+
+    # Send the message via local SMTP server.
+    if send:
+        server = smtplib.SMTP('smtp.gmail.com:587')
+        server.starttls()
+        server.login(username, password)
+        server.sendmail(me, you, msg.as_string())
+        server.quit()
+    else:
+        print ("No mail to send")
+
+
+if __name__ == "__main__":
+    sendmail()
