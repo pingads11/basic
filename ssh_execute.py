@@ -5,7 +5,7 @@ ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
 
-ip = ['10.14.44.35','10.14.44.36']
+ip = ['x.x.x.35','x.x.x.36']
 
 def vmrun():
     while True:
